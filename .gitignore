@@ -1,0 +1,27 @@
+# Secrets & local env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+credentials/
+
+# Editor / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~
+
+# Python / tooling (if local scripts added later)
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# HA / personal dumps
+*.llat
+*.token
+ha-token*

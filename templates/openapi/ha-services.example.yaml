@@ -1,0 +1,98 @@
+# 示例：将 Home Assistant 灯/场景服务暴露给千问 OpenAPI 插件。
+# 用法：把 servers.url 换成你的 HTTPS 入口；在插件里配置 Bearer = HA Long-Lived Token。
+# 本文件为 stub，字段名以你使用的千问控制台「OpenAPI 导入」要求为准，可能需微调。
+# 安全：仅私有插件；勿把本文件连同真实 token/域名提交到公开仓库。
+
+openapi: 3.0.3
+info:
+  title: Douhao HA Lights & Scenes (example)
+  description: >
+    Minimal Home Assistant service wrappers for private Qianwen Skill.
+    Maps to POST /api/services/{domain}/{service}. Maintained as a template by [豆号智家](https://www.douhaosmart.com).
+  version: 0.1.0
+
+servers:
+  - url: https://YOUR-HA-HTTPS-HOST
+    description: User-owned HA via tunnel / Nabu Casa / reverse proxy
+
+security:
+  - haBearer: []
+
+paths:
+  /api/services/light/turn_on:
+    post:
+      operationId: light_turn_on
+      summary: Turn on a light entity
+      description: Calls Home Assistant light.turn_on for a single entity_id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityTarget"
+            example:
+              entity_id: light.living_room
+      responses:
+        "200":
+          description: HA accepted the service call (body may be empty list or state objects)
+        "401":
+          description: Invalid or missing Long-Lived Token
+
+  /api/services/light/turn_off:
+    post:
+      operationId: light_turn_off
+      summary: Turn off a light entity
+      description: Calls Home Assistant light.turn_off for a single entity_id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityTarget"
+            example:
+              entity_id: light.living_room
+      responses:
+        "200":
+          description: HA accepted the service call
+        "401":
+          description: Invalid or missing Long-Lived Token
+
+  /api/services/scene/turn_on:
+    post:
+      operationId: scene_turn_on
+      summary: Activate a scene
+      description: >
+        Calls Home Assistant scene.turn_on. In HA, activating a scene uses the
+        turn_on service on a scene.* entity_id.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/EntityTarget"
+            example:
+              entity_id: scene.home_mode
+      responses:
+        "200":
+          description: HA accepted the service call
+        "401":
+          description: Invalid or missing Long-Lived Token
+
+components:
+  securitySchemes:
+    haBearer:
+      type: http
+      scheme: bearer
+      bearerFormat: HA-LLAT
+      description: Home Assistant Long-Lived Access Token (user-issued; treat as admin-level)
+
+  schemas:
+    EntityTarget:
+      type: object
+      required:
+        - entity_id
+      properties:
+        entity_id:
+          type: string
+          description: Fully qualified HA entity id, e.g. light.living_room or scene.sleep
+          example: light.living_room
